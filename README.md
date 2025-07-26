@@ -30,5 +30,5 @@ Version: 1.0.6
 Версия в этом файле автоматически обновляется при создании нового релиза через GitHub Actions.
 
 <!-- Эти строки важны для автообновления -->
-Current version: v1.0.5
+Current version: v1.0.6
 <!-- End version marker -->
