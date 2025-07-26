@@ -19,7 +19,7 @@ import (
 type Config struct {
 	PageLoadWait  int `json:"pageLoadWait"`
 	DriverTimeout int `json:"driverTimeout"`
-	MaxRetries    int `json:"maxRetries"` // Максимальное количество попыток перезапуска
+	MaxRetries    int `json:"maxRetries"`
 }
 
 const (
@@ -126,7 +126,6 @@ func main() {
 }
 
 func processUrl(url string, port int, pageLoadWait int) bool {
-	fmt.Println("   - Настройка Chrome...")
 	chromeCaps := chrome.Capabilities{
 		Args: []string{
 			"--headless",
@@ -146,27 +145,23 @@ func processUrl(url string, port int, pageLoadWait int) bool {
 	}
 	defer wd.Quit()
 
-	fmt.Println("   - Открытие страницы...")
 	if err = wd.Get(url); err != nil {
 		log.Printf("Ошибка при открытии страницы: %v", err)
 		return false
 	}
 
-	fmt.Printf("   - Ожидание загрузки (%dс)...\n", pageLoadWait)
+	fmt.Printf("   - Ожидание загрузки web страницы (%dс)...\n", pageLoadWait)
 	time.Sleep(time.Duration(pageLoadWait) * time.Second)
 
-	fmt.Println("   - Генерация имени файла...")
 	filename := generateFilename(url)
 	screenshotPath := filepath.Join(screenshotsDir, filename)
 
-	fmt.Println("   - Создание скриншота...")
 	screenshot, err := wd.Screenshot()
 	if err != nil {
 		log.Printf("Ошибка при создании скриншота: %v", err)
 		return false
 	}
 
-	fmt.Println("   - Сохранение скриншота...")
 	if err = os.WriteFile(screenshotPath, screenshot, 0644); err != nil {
 		log.Printf("Ошибка при сохранении скриншота: %v", err)
 		return false
@@ -254,7 +249,7 @@ func loadConfig(filename string) (*Config, error) {
 		cfg.DriverTimeout = 5
 	}
 	if cfg.MaxRetries == 0 {
-		cfg.MaxRetries = 5 // Значение по умолчанию
+		cfg.MaxRetries = 3
 	}
 
 	return &cfg, nil
@@ -280,7 +275,7 @@ func readLinksFromFile(filename string) ([]string, error) {
 }
 
 func generateFilename(url string) string {
-	timestamp := time.Now().Format("2006-01-02_15-04-05")
+	timestamp := time.Now().Format("02-01-2006_15-04")
 	cleanURL := strings.NewReplacer(
 		"https://", "",
 		"http://", "",

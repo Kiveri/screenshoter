@@ -1,4 +1,9 @@
 {
+  "__comments__": {
+    "pageLoadWait": "Таймаут загрузки web страницы (секунды)",
+    "maxRetries": "Максимальное количество попыток перезапуска",
+    "driverTimeout": "Таймаут ожидания ChromeDriver (секунды)"
+  },
   "pageLoadWait": 3,
   "driverTimeout": 3,
   "maxRetries": 3
