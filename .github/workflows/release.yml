@@ -33,7 +33,7 @@ jobs:
           git checkout -b temp-release-branch
           git add README.md
           git commit -m "Update version to v$VERSION in README [skip ci]"
-          git push origin temp-release-branch:main
+          git push origin temp-release-branch:master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
