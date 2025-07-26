@@ -1,10 +1,12 @@
 {
   "__comments__": {
     "pageLoadWait": "Таймаут загрузки web страницы (секунды)",
-    "maxRetries": "Максимальное количество попыток перезапуска",
-    "driverTimeout": "Таймаут ожидания ChromeDriver (секунды)"
+    "driverTimeout": "Таймаут ожидания ChromeDriver (секунды)",
+    "maxRetries": "Максимальное количество попыток перезапуска для каждой ссылки",
+    "maxWorkers": "Кол-во параллельно обрабатывающихся ссылок (больше 50 смысла нет)"
   },
   "pageLoadWait": 3,
-  "driverTimeout": 3,
-  "maxRetries": 3
+  "driverTimeout": 10,
+  "maxRetries": 3,
+  "maxWorkers": 25
 }
