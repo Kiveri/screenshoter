@@ -1,5 +1,5 @@
-# Screenshoter v1.0.0
-Version: 1.0.0
+# Screenshoter v1.0.3
+Version: 1.0.3
 
 ![Go](https://img.shields.io/badge/Go-1.24+-blue)
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey)
