@@ -18,16 +18,13 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.24'
+          go-version: '1.21'
 
       - name: Update version in README
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          
-          # Обновляем версию в README.md
-          sed -i "s/^Version:.*/Version: $VERSION/" README.md
-          sed -i "s/Screenshoter v[0-9.]*/Screenshoter v$VERSION/" README.md
-          
+          $VERSION = "${{ github.ref_name }}".Replace('v', '')
+          (Get-Content README.md) -replace '^Version:.*', "Version: $VERSION" | Set-Content README.md
+          (Get-Content README.md) -replace 'Screenshoter v[0-9.]+', "Screenshoter v$VERSION" | Set-Content README.md
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add README.md
@@ -55,7 +52,7 @@ jobs:
           cd ..
           echo "Archive content:"
           Expand-Archive -Path screenshoter.zip -DestinationPath archive_content
-          ls archive_content
+          dir archive_content
 
       - name: Upload release
         uses: softprops/action-gh-release@v1
