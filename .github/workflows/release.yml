@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Триггер на теги вида v1.0, v2.0 и т.д.
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24'
+
+      - name: Update version in README
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          
+          sed -i "s/^Version:.*/Version: $VERSION/" README.md
+          sed -i "s/Screenshoter v[0-9.]*/Screenshoter v$VERSION/" README.md
+          
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add README.md
+          git commit -m "Update version to v$VERSION in README [skip ci]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build
+        run: go build -o release/screenshoter.exe
+
+      - name: Prepare release files
+        run: |
+          cp chromedriver.exe release/
+          cp config.json release/
+          cp links.txt release/
+          cp README.md release/
+
+      - name: Create ZIP
+        run: Compress-Archive -Path .\release\* -DestinationPath .\release\screenshoter.zip
+
+      - name: Upload release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/screenshoter.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
