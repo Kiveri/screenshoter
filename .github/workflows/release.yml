@@ -18,31 +18,46 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21'
+          go-version: '1.24'
 
-      - name: Prepare release folder
+      - name: Update version in README
         run: |
-          mkdir -Force release | Out-Null
+          VERSION=${GITHUB_REF#refs/tags/v}
+          
+          # Обновляем версию в README.md
+          sed -i "s/^Version:.*/Version: $VERSION/" README.md
+          sed -i "s/Screenshoter v[0-9.]*/Screenshoter v$VERSION/" README.md
+          
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add README.md
+          git commit -m "Update version to v$VERSION in README [skip ci]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build
+        run: |
+          mkdir -p release
+          go build -o release/screenshoter.exe .
+
+      - name: Prepare release files
+        run: |
           cp chromedriver.exe release/
           cp config.json release/
           cp links.txt release/
           cp README.md release/
 
-      - name: Build
-        run: go build -o release/screenshoter.exe
-
-      - name: Create clean ZIP
+      - name: Create ZIP archive
         run: |
-          $files = @(
-            'release\screenshoter.exe',
-            'release\chromedriver.exe',
-            'release\config.json',
-            'release\links.txt',
-            'release\README.md'
-          )
-          Compress-Archive -Path $files -DestinationPath .\release\screenshoter.zip
+          cd release
+          Compress-Archive -Path * -DestinationPath ../screenshoter.zip
+          cd ..
+          echo "Archive content:"
+          Expand-Archive -Path screenshoter.zip -DestinationPath archive_content
+          ls archive_content
 
       - name: Upload release
         uses: softprops/action-gh-release@v1
         with:
-          files: release/screenshoter.zip
+          files: screenshoter.zip

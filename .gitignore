@@ -1,5 +1,4 @@
 /.idea
-release/
-!release/chromedriver.exe
-!release/config.json
-!release/links.txt
+/release/
+*.zip
+screenshoter.exe

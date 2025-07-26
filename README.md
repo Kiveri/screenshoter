@@ -8,7 +8,7 @@ Version: 1.0.0
 
 ## Как использовать
 
-1. Скачайте последний релиз из [раздела Releases](https://github.com/ваш-аккаунт/ваш-репозиторий/releases)
+1. Скачайте последний релиз из [раздела Releases](https://github.com/Kiveri/screenshoter/releases)
 2. Распакуйте архив `screenshoter.zip`
 3. Отредактируйте файлы:
     - `links.txt` - список URL для скриншотов
