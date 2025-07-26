@@ -37,12 +37,10 @@ func main() {
 	fmt.Println("🚀 Скрипт для создания скриншотов веб-страниц")
 	fmt.Println("------------------------------------------")
 
-	// Проверяем текущую директорию
 	if wd, err := os.Getwd(); err == nil {
 		fmt.Printf("📂 Текущая рабочая директория: %s\n", wd)
 	}
 
-	// Загрузка конфигурации
 	fmt.Println("⚙️ Загружаем конфигурацию...")
 	cfg, err := loadConfig(configFile)
 	if err != nil {
@@ -50,7 +48,6 @@ func main() {
 	}
 	printConfig(cfg)
 
-	// Проверка наличия chromedriver.exe в корне проекта
 	fmt.Println("🔍 Проверяем наличие chromedriver.exe...")
 	driverPath := filepath.Join(".", chromeDriver)
 	absDriverPath, err := filepath.Abs(driverPath)
@@ -58,7 +55,7 @@ func main() {
 		log.Fatalf("❌ Ошибка получения абсолютного пути: %v", err)
 	}
 
-	if _, err := os.Stat(absDriverPath); os.IsNotExist(err) {
+	if _, err = os.Stat(absDriverPath); os.IsNotExist(err) {
 		log.Fatalf("❌ chromedriver.exe не найден по пути: %s\n"+
 			"Убедитесь, что:\n"+
 			"1. chromedriver.exe находится в корне проекта\n"+
@@ -67,13 +64,11 @@ func main() {
 	}
 	fmt.Printf("✅ chromedriver.exe найден по пути: %s\n", absDriverPath)
 
-	// Подготовка папок
 	fmt.Println("📂 Подготавливаем рабочее пространство...")
-	if err := prepareWorkspace(); err != nil {
+	if err = prepareWorkspace(); err != nil {
 		log.Fatalf("❌ Ошибка подготовки: %v", err)
 	}
 
-	// Чтение списка ссылок
 	fmt.Println("🔗 Читаем список ссылок...")
 	links, err := readLinksFromFile(linksFile)
 	if err != nil {
@@ -86,30 +81,25 @@ func main() {
 
 	fmt.Printf("✅ Найдено %d ссылок для обработки\n\n", len(links))
 
-	// Создаем каналы для работы
 	jobs := make(chan string, len(links))
 	results := make(chan processingResult, len(links))
 
-	// Запускаем worker'ов
 	var wg sync.WaitGroup
 	for i := 0; i < cfg.MaxWorkers; i++ {
 		wg.Add(1)
 		go worker(i+1, jobs, results, &wg, cfg, driverPath)
 	}
 
-	// Отправляем задачи в канал
 	for _, url := range links {
 		jobs <- url
 	}
 	close(jobs)
 
-	// Запускаем сборщик результатов
 	go func() {
 		wg.Wait()
 		close(results)
 	}()
 
-	// Обрабатываем результаты
 	var (
 		successCount int
 		failedLinks  []string
@@ -126,10 +116,9 @@ func main() {
 		}
 	}
 
-	// Сохраняем необработанные ссылки
 	if len(failedLinks) > 0 {
 		fmt.Printf("\n⚠️ Сохраняем %d необработанных ссылок...\n", len(failedLinks))
-		if err := saveFailedLinks(failedLinks); err != nil {
+		if err = saveFailedLinks(failedLinks); err != nil {
 			log.Printf("⚠️ Не удалось сохранить список необработанных ссылок: %v", err)
 		}
 	}
@@ -157,17 +146,14 @@ func worker(id int, jobs <-chan string, results chan<- processingResult, wg *syn
 				log.Printf("🔄 Worker #%d попытка %d/%d для: %s", id, attempt, cfg.MaxRetries, url)
 			}
 
-			// Создаем новый экземпляр драйвера для каждой попытки
 			port, cmd, driverErr := startChromeDriver(driverPath, time.Duration(cfg.DriverTimeout)*time.Second)
 			if driverErr != nil {
 				err = fmt.Errorf("не удалось запустить ChromeDriver: %v", driverErr)
 				continue
 			}
 
-			// Обрабатываем URL
 			processErr := processURL(url, port, cfg.PageLoadWait)
 
-			// Закрываем драйвер
 			if cmd.Process != nil {
 				cmd.Process.Kill()
 			}
@@ -185,7 +171,6 @@ func worker(id int, jobs <-chan string, results chan<- processingResult, wg *syn
 }
 
 func processURL(url string, port int, pageLoadWait int) error {
-	// Настройка Chrome
 	chromeCaps := chrome.Capabilities{
 		Args: []string{
 			"--headless",
@@ -197,21 +182,18 @@ func processURL(url string, port int, pageLoadWait int) error {
 	caps := selenium.Capabilities{"browserName": "chrome"}
 	caps.AddChrome(chromeCaps)
 
-	// Подключаемся к ChromeDriver
 	wd, err := selenium.NewRemote(caps, fmt.Sprintf("http://localhost:%d", port))
 	if err != nil {
 		return fmt.Errorf("ошибка подключения к ChromeDriver: %v", err)
 	}
 	defer wd.Quit()
 
-	// Открываем страницу
-	if err := wd.Get(url); err != nil {
+	if err = wd.Get(url); err != nil {
 		return fmt.Errorf("ошибка загрузки страницы: %v", err)
 	}
 
 	time.Sleep(time.Duration(pageLoadWait) * time.Second)
 
-	// Создаем скриншот
 	filename := generateFilename(url)
 	screenshotPath := filepath.Join(screenshotsDir, filename)
 
@@ -220,7 +202,7 @@ func processURL(url string, port int, pageLoadWait int) error {
 		return fmt.Errorf("ошибка создания скриншота: %v", err)
 	}
 
-	if err := os.WriteFile(screenshotPath, screenshot, 0644); err != nil {
+	if err = os.WriteFile(screenshotPath, screenshot, 0644); err != nil {
 		return fmt.Errorf("ошибка сохранения скриншота: %v", err)
 	}
 
@@ -229,7 +211,7 @@ func processURL(url string, port int, pageLoadWait int) error {
 
 func generateFilename(url string) string {
 	now := time.Now().UTC().Add(3 * time.Hour)
-	timestamp := now.Format("2006-01-02_15-04-05.000") // ЧЧ:ММ_ДД.ММ.ГГГГ
+	timestamp := now.Format("2006-01-02_15-04-05.000")
 
 	cleanURL := strings.NewReplacer(
 		"https://", "",
@@ -254,14 +236,12 @@ func generateFilename(url string) string {
 }
 
 func startChromeDriver(driverPath string, timeout time.Duration) (int, *exec.Cmd, error) {
-	// Получаем абсолютный путь к chromedriver.exe
 	absDriverPath, err := filepath.Abs(driverPath)
 	if err != nil {
 		return 0, nil, fmt.Errorf("ошибка получения абсолютного пути: %v", err)
 	}
 
-	// Проверяем существование файла
-	if _, err := os.Stat(absDriverPath); os.IsNotExist(err) {
+	if _, err = os.Stat(absDriverPath); os.IsNotExist(err) {
 		return 0, nil, fmt.Errorf("chromedriver.exe не найден по пути: %s", absDriverPath)
 	}
 
@@ -270,13 +250,12 @@ func startChromeDriver(driverPath string, timeout time.Duration) (int, *exec.Cmd
 		return 0, nil, fmt.Errorf("не удалось найти свободный порт: %v", err)
 	}
 
-	// Явно указываем полный путь к исполняемому файлу
 	cmd := exec.Command(absDriverPath, fmt.Sprintf("--port=%d", port))
-	if err := cmd.Start(); err != nil {
+	if err = cmd.Start(); err != nil {
 		return 0, nil, fmt.Errorf("не удалось запустить ChromeDriver: %v (полный путь: %s)", err, absDriverPath)
 	}
 
-	if err := waitForChromeDriver(port, timeout); err != nil {
+	if err = waitForChromeDriver(port, timeout); err != nil {
 		cmd.Process.Kill()
 		return 0, nil, err
 	}
@@ -304,11 +283,10 @@ func loadConfig(filename string) (*Config, error) {
 	}
 
 	var cfg Config
-	if err := json.Unmarshal(data, &cfg); err != nil {
+	if err = json.Unmarshal(data, &cfg); err != nil {
 		return nil, err
 	}
 
-	// Установка значений по умолчанию
 	if cfg.PageLoadWait <= 0 {
 		cfg.PageLoadWait = 5
 	}
@@ -330,7 +308,6 @@ func prepareWorkspace() error {
 		return fmt.Errorf("не удалось создать папку для скриншотов: %v", err)
 	}
 
-	// Очищаем файл с необработанными ссылками
 	if err := os.WriteFile(failedLinksFile, []byte{}, 0644); err != nil {
 		return fmt.Errorf("не удалось инициализировать файл для необработанных ссылок: %v", err)
 	}
