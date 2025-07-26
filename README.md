@@ -1,5 +1,5 @@
-# Screenshoter v1.0.3
-Version: 1.0.3
+# Screenshoter v1.0.4
+Version: 1.0.4
 
 ![Go](https://img.shields.io/badge/Go-1.24+-blue)
 ![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey)
@@ -30,5 +30,5 @@ Version: 1.0.3
 Версия в этом файле автоматически обновляется при создании нового релиза через GitHub Actions.
 
 <!-- Эти строки важны для автообновления -->
-Current version: v1.0.0
+Current version: v1.0.4
 <!-- End version marker -->
