@@ -1,4 +1,5 @@
 {
   "pageLoadWait": 3,
-  "driverTimeout": 3
+  "driverTimeout": 3,
+  "maxRetries": 3
 }
