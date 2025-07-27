@@ -127,6 +127,14 @@ func main() {
 	if len(failedLinks) > 0 {
 		fmt.Printf("Необработанные ссылки сохранены в: %s\n", failedLinksFile)
 	}
+
+	fmt.Println("\n==========================================")
+	fmt.Println("Для выхода нажмите Enter...")
+	fmt.Println("Вы можете проверить результаты в папке:")
+	absScreenshotsDir, _ := filepath.Abs(screenshotsDir)
+	fmt.Println(absScreenshotsDir)
+	fmt.Println("==========================================")
+	fmt.Scanln()
 }
 
 type processingResult struct {
